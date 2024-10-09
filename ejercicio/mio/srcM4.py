@@ -142,6 +142,8 @@ def buscar_jornada():
     jornadas = [i[0] for i in cursor]
         
     v = Toplevel()
+    lb = Label(v, text="Seleccione la jornada: ")
+    lb.pack(side = LEFT)  
     sb = Spinbox(v, values=jornadas)
     sb.bind("<Return>", lista)
     sb.pack()
@@ -177,6 +179,8 @@ def burcar_estadisticas_jornada():
     jornadas = [i[0] for i in cursor]
         
     v = Toplevel()
+    lb = Label(v, text="Seleccione la jornada: ")
+    lb.pack(side = LEFT)  
     sb = Spinbox(v, values=jornadas)
     sb.bind("<Return>", estadisticas)
     sb.pack()
