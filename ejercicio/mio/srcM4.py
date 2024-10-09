@@ -31,7 +31,7 @@ def ventana_principal():
     boton_almacenar = Button(raiz, text="Almacenar Resultados", command=cargar)
     boton_almacenar.pack(pady=0)
 
-    boton_listar = Button(raiz, text="Listar Jornadas", command=raiz.quit)
+    boton_listar = Button(raiz, text="Listar Jornadas", command=listar_partidos_jornada)
     boton_listar.pack(pady=0)
 
     boton_buscar_jornada = Button(raiz, text="Buscar Jornada", command=raiz.quit)
@@ -86,7 +86,7 @@ def almacenar_bd():
             resultado_local = resultados[0].string
             resultado_visitante = resultados[1].string
             
-            print(f"{numero_jornada} - Link: {link} | {equipo_local} vs {equipo_visitante} | Goles: {resultado_local}-{resultado_visitante}")
+            print(f"{numero_jornada} - Link: {link} |{equipo_local} vs {equipo_visitante}| Goles: {resultado_local}-{resultado_visitante}")
             
             conn.execute("""INSERT INTO RESULTADOS (JORNADA, LINK, EQUIPO1, EQUIPO2, RESULTADO1, RESULTADO2) VALUES (?,?,?,?,?,?)""",
                      (numero_jornada, link, equipo_local, equipo_visitante, resultado_local, resultado_visitante))
@@ -97,6 +97,32 @@ def almacenar_bd():
     messagebox.showinfo("Base Datos",
                         "Base de datos creada correctamente \nHay " + str(cursor.fetchone()[0]) + " registros")
     conn.close()
+   
+   
+def listar_partidos_jornada():
+            conn = sqlite3.connect('resultados.db')
+            conn.text_factory = str
+            cursor = conn.execute("SELECT JORNADA, LINK, EQUIPO1, EQUIPO2, RESULTADO1, RESULTADO2 FROM RESULTADOS")
+            conn.close
+            formato_partidos(cursor)
+
+def formato_partidos(cursor): 
+    v = Toplevel()
+    sc = Scrollbar(v)
+    sc.pack(side=RIGHT, fill=Y)
+    lb = Listbox(v, width=150, yscrollcommand=sc.set)
+    jornada=0
+    for row in cursor:
+        if row[0]!= jornada:
+            jornada=row[0]
+            lb.insert(END, "\n\n")
+            s = row[0].upper()
+            lb.insert(END, s)
+            lb.insert(END, "------------------------------------------------------------------------")
+        l = str(row[2]) + " " + str(row[4]) + "-" + str(row[5]) + " " + row[3]
+        lb.insert(END, l)
+    lb.pack(side=LEFT, fill=BOTH)
+    sc.config(command=lb.yview)
 
 
 if __name__ == '__main__':
