@@ -34,10 +34,10 @@ def ventana_principal():
     boton_listar = Button(raiz, text="Listar Jornadas", command=listar_partidos_jornada)
     boton_listar.pack(pady=0)
 
-    boton_buscar_jornada = Button(raiz, text="Buscar Jornada", command=burcar_jornada)
+    boton_buscar_jornada = Button(raiz, text="Buscar Jornada", command=buscar_jornada)
     boton_buscar_jornada.pack(pady=0)
 
-    boton_estadisticas = Button(raiz, text="Estadísticas Jornada", command=raiz.quit)
+    boton_estadisticas = Button(raiz, text="Estadísticas Jornada", command=burcar_estadisticas_jornada)
     boton_estadisticas.pack(pady=0)
 
     boton_buscar_goles = Button(raiz, text="Buscar Goles", command=raiz.quit)
@@ -112,10 +112,10 @@ def formato_partidos(cursor):
     sc = Scrollbar(v)
     sc.pack(side=RIGHT, fill=Y)
     lb = Listbox(v, width=150, yscrollcommand=sc.set)
-    jornada=0
+    jornada = 0
     for row in cursor:
-        if row[0]!= jornada:
-            jornada=row[0]
+        if row[0] != jornada:
+            jornada = row[0]
             lb.insert(END, "\n\n")
             s = row[0].upper()
             lb.insert(END, s)
@@ -126,7 +126,7 @@ def formato_partidos(cursor):
     sc.config(command=lb.yview)
     
     
-def burcar_jornada():
+def buscar_jornada():
 
     def lista(event):
             conn = sqlite3.connect('resultados.db')
@@ -147,6 +147,55 @@ def burcar_jornada():
     sb.pack()
     
     conn.close()
+
+    
+def burcar_estadisticas_jornada():
+
+    def estadisticas(event):
+            conn = sqlite3.connect('resultados.db')
+            conn.text_factory = str
+            cursor = conn.execute("SELECT SUM(RESULTADO1)+SUM(RESULTADO2) FROM RESULTADOS WHERE JORNADA = '" + sb.get() + "'")
+            goles = cursor.fetchone()[0]
+            cursor = conn.execute("SELECT RESULTADO1,RESULTADO2 FROM RESULTADOS WHERE JORNADA = '" + sb.get() + "'")
+            empates = 0
+            local = 0
+            visitante = 0
+            for row in cursor:
+                if row[0] == row[1]:
+                    empates += 1
+                elif row[0] > row[1]:
+                    local += 1
+                else:
+                    visitante += 1
+            conn.close
+            formato_estadisticas(goles,local,visitante,empates)
+    
+    conn = sqlite3.connect('resultados.db')
+    conn.text_factory = str
+    cursor = conn.execute("SELECT DISTINCT JORNADA FROM RESULTADOS")
+    
+    jornadas = [i[0] for i in cursor]
+        
+    v = Toplevel()
+    sb = Spinbox(v, values=jornadas)
+    sb.bind("<Return>", estadisticas)
+    sb.pack()
+    
+    conn.close()
+    
+def formato_estadisticas(goles,local,visitante,empates): 
+
+    v = Toplevel()
+    sc = Scrollbar(v)
+    sc.pack(side=RIGHT, fill=Y)
+    lb = Listbox(v, width=150, yscrollcommand=sc.set)
+    lb.insert(END, "TOTAL GOLES JORNADA : " + str(goles))
+    lb.insert(END, "\n\n")
+    lb.insert(END, "EMPATES : " + str(empates))
+    lb.insert(END, "VICTORIAS LOCALES : " + str(local))
+    lb.insert(END, "VICTORIAS VISITANTES : " + str(visitante))
+    lb.pack(side=LEFT, fill=BOTH)
+    sc.config(command=lb.yview)
 
 
 if __name__ == '__main__':
