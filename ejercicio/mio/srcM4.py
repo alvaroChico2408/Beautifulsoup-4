@@ -34,7 +34,7 @@ def ventana_principal():
     boton_listar = Button(raiz, text="Listar Jornadas", command=listar_partidos_jornada)
     boton_listar.pack(pady=0)
 
-    boton_buscar_jornada = Button(raiz, text="Buscar Jornada", command=raiz.quit)
+    boton_buscar_jornada = Button(raiz, text="Buscar Jornada", command=burcar_jornada)
     boton_buscar_jornada.pack(pady=0)
 
     boton_estadisticas = Button(raiz, text="Estadísticas Jornada", command=raiz.quit)
@@ -106,6 +106,7 @@ def listar_partidos_jornada():
             conn.close
             formato_partidos(cursor)
 
+
 def formato_partidos(cursor): 
     v = Toplevel()
     sc = Scrollbar(v)
@@ -123,6 +124,29 @@ def formato_partidos(cursor):
         lb.insert(END, l)
     lb.pack(side=LEFT, fill=BOTH)
     sc.config(command=lb.yview)
+    
+    
+def burcar_jornada():
+
+    def lista(event):
+            conn = sqlite3.connect('resultados.db')
+            conn.text_factory = str
+            cursor = conn.execute("SELECT JORNADA, LINK, EQUIPO1, EQUIPO2, RESULTADO1, RESULTADO2 FROM RESULTADOS WHERE JORNADA = '" + sb.get() + "'")
+            conn.close
+            formato_partidos(cursor)
+    
+    conn = sqlite3.connect('resultados.db')
+    conn.text_factory = str
+    cursor = conn.execute("SELECT DISTINCT JORNADA FROM RESULTADOS")
+    
+    jornadas = [i[0] for i in cursor]
+        
+    v = Toplevel()
+    sb = Spinbox(v, values=jornadas)
+    sb.bind("<Return>", lista)
+    sb.pack()
+    
+    conn.close()
 
 
 if __name__ == '__main__':
